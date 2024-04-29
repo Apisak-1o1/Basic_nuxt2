@@ -2,52 +2,58 @@
   <div>
     <nuxt-child />
     <h1>videos List</h1>
-    <!-- <input v-model="getKeyword" type="text" placeholder="Looking for something?">
-    {{ getKeyword }} -->
-    <div v-for="video in videos" :key="video.id">
+    <input v-model="getKeyword" type="text" placeholder="Looking for something?" @keyup="searchVideos()">
+    {{ getKeyword }}
+    <div v-for="video in $store.state.videos" :key="video.id">
       <nuxt-link :to="`/videos/${video.id}`">
-        <div>{{ video.title }}</div>
+        <h3>
+          {{ video.title }}
+        </h3>
       </nuxt-link>
     </div>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   data () {
     return {
-      videos: []
-      // getKeyword: ''
+      videos: [],
+      getKeyword: ''
     }
-  },
-  async fetch () {
-    await this.getItem()
-    // await this.searchVideos()
   },
   head: {
     title: 'Video List'
   },
-  // computed: {
-  //   searchVideos () {
-  //     return this.videos.filter((video) => {
-  //       const searchLowercase = this.getKeyword.toLowerCase()
-  //       const videoTitle = video.title.toLowerCase()
-  //       return videoTitle.include(searchLowercase)
-  //     })
-  //   }
-  // },
+  async mounted () {
+    await this.listVDO()
+  },
   methods: {
-    async getItem () {
+    ...mapActions({
+      listVDOStore: 'listVDO'
+    }),
+    async listVDO () {
       try {
-        const response = await this.$axios.$get('/')
-        this.videos = response
+        const resp = await this.$axios.$get('/')
+        this.listVDO = resp
+      } catch (err) {
         // eslint-disable-next-line no-console
-        // console.log(response)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error', error)
-        this.videos = []
+        console.log(err)
       }
+      if (this.listVDO) {
+        this.$store.commit('SET_VIDEOS', this.listVDO)
+        this.listVDO = ''
+      }
+    },
+    searchVideos () {
+      return this.videos.filter((video) => {
+        const searchLowercase = this.getKeyword.toLowerCase()
+        const videoTitle = video.title.toLowerCase()
+        // eslint-disable-next-line no-console
+        console.log(videoTitle.includes(searchLowercase))
+        return videoTitle.includes(searchLowercase)
+      })
     }
   }
 }
