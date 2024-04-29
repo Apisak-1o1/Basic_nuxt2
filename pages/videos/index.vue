@@ -1,65 +1,64 @@
-.<template>
+<!-- eslint-disable no-console -->
+<template>
   <div>
     <nuxt-child />
     <h1>videos List</h1>
-    <input v-model="getKeyword" type="text" placeholder="Looking for something?" @keyup="searchVideos()">
-    {{ getKeyword }}
-    <div v-for="video in $store.state.videos" :key="video.id">
-      <div style="visibility: visible;">
-        <div v-if="searchVideos()">
-          <nuxt-link :to="`/videos/${video.id}`">
-            <h3>
-              {{ video.title }}
-            </h3>
-          </nuxt-link>
-        </div>
-        <div v-else style="visibility: hidden;" />
+    <input v-model="keyword" type="text" placeholder="Looking for something?">
+    {{ keyword }}
+    <div v-for="video in filteredVideos" :key="video.id">
+      <div v-if="!hideVideo(video)">
+        <nuxt-link :to="`/videos/${video.id}`">
+          <h3>{{ video.title }}</h3>
+        </nuxt-link>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 export default {
   data () {
     return {
-      getKeyword: ''
+      keyword: ''
     }
   },
   head: {
     title: 'Video List'
   },
+  computed: {
+    ...mapState(['videos']),
+    filteredVideos () {
+      if (this.keyword === '') {
+        return this.videos
+      } else {
+        const searchLowercase = this.keyword.toLowerCase()
+        return this.videos.filter(video =>
+          video.title.toLowerCase().includes(searchLowercase)
+        )
+      }
+    }
+  },
   async mounted () {
     await this.listVDO()
   },
   methods: {
-    ...mapActions({
-      listVDOStore: 'listVDO'
-    }),
+    ...mapActions(['listVDO']),
     async listVDO () {
       try {
         const resp = await this.$axios.$get('/')
-        this.listVDO = resp
+        this.$store.commit('SET_VIDEOS', resp)
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.log(err)
-      }
-      if (this.listVDO) {
-        this.$store.commit('SET_VIDEOS', this.listVDO)
-        this.videos = this.listVDO
-        this.listVDO = ''
+        console.error(err)
       }
     },
-    searchVideos () {
-      if (this.getKeyword.length > 0) {
-        return this.videos.filter((video) => {
-          const searchLowercase = this.getKeyword.toLowerCase()
-          const videoTitle = video.title.toLowerCase()
-          // eslint-disable-next-line no-console
-          console.log(videoTitle.includes(searchLowercase))
-          return videoTitle.includes(searchLowercase)
-        })
+    hideVideo (video) {
+      if (this.keyword === '') {
+        return false
+      } else {
+        const searchLowercase = this.keyword.toLowerCase()
+        return !video.title.toLowerCase().includes(searchLowercase)
       }
     }
   }
