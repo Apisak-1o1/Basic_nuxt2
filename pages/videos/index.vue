@@ -5,11 +5,16 @@
     <input v-model="getKeyword" type="text" placeholder="Looking for something?" @keyup="searchVideos()">
     {{ getKeyword }}
     <div v-for="video in $store.state.videos" :key="video.id">
-      <nuxt-link :to="`/videos/${video.id}`">
-        <h3>
-          {{ video.title }}
-        </h3>
-      </nuxt-link>
+      <div style="visibility: visible;">
+        <div v-if="searchVideos()">
+          <nuxt-link :to="`/videos/${video.id}`">
+            <h3>
+              {{ video.title }}
+            </h3>
+          </nuxt-link>
+        </div>
+        <div v-else style="visibility: hidden;" />
+      </div>
     </div>
   </div>
 </template>
@@ -19,7 +24,6 @@ import { mapActions } from 'vuex'
 export default {
   data () {
     return {
-      videos: [],
       getKeyword: ''
     }
   },
@@ -43,17 +47,20 @@ export default {
       }
       if (this.listVDO) {
         this.$store.commit('SET_VIDEOS', this.listVDO)
+        this.videos = this.listVDO
         this.listVDO = ''
       }
     },
     searchVideos () {
-      return this.videos.filter((video) => {
-        const searchLowercase = this.getKeyword.toLowerCase()
-        const videoTitle = video.title.toLowerCase()
-        // eslint-disable-next-line no-console
-        console.log(videoTitle.includes(searchLowercase))
-        return videoTitle.includes(searchLowercase)
-      })
+      if (this.getKeyword.length > 0) {
+        return this.videos.filter((video) => {
+          const searchLowercase = this.getKeyword.toLowerCase()
+          const videoTitle = video.title.toLowerCase()
+          // eslint-disable-next-line no-console
+          console.log(videoTitle.includes(searchLowercase))
+          return videoTitle.includes(searchLowercase)
+        })
+      }
     }
   }
 }
