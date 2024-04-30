@@ -1,5 +1,5 @@
 .<template>
-  <div>
+  <div class="top-panels">
     <h1>We're in videos.vue</h1>
     <nuxt-child />
   </div>
@@ -14,5 +14,8 @@ export default {
 </script>
 
 <style>
-
+.top-panels{
+  widows: 40vh;
+  height: auto;
+}
 </style>

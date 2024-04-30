@@ -1,4 +1,4 @@
-<template>
+<template class="whole-web">
   <div>
     <div id="navbar">
       <div class="navbar-links">
@@ -37,5 +37,9 @@
 #default-body {
   max-width: 800px;
   margin: auto;
+}
+.whole-web{
+  width:100%;
+  height: auto;
 }
 </style>
